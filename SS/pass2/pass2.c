@@ -14,7 +14,7 @@ int main() {
     optab = fopen("input/optab.txt", "r");
     symtab = fopen("input/symtab.txt", "r");
     lengthFile = fopen("input/length.txt", "r");
-    output = fopen("objectcode.txt", "w");
+    output = fopen("output/objectcode.txt", "w");
 
     if (!intermediate || !optab || !symtab || !lengthFile || !output) {
         printf("Error opening files.\n");

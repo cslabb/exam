@@ -9,9 +9,9 @@ int main() {
 
     input = fopen("input/input.txt", "r");
     optab = fopen("input/optab.txt", "r");
-    symtab = fopen("symtab.txt", "w");
-    intermediate = fopen("intermediate.txt", "w");
-    lengthFile = fopen("length.txt", "w");
+    symtab = fopen("output/symtab.txt", "w");
+    intermediate = fopen("output/intermediate.txt", "w");
+    lengthFile = fopen("output/length.txt", "w");
 
     if (!input || !optab || !symtab || !intermediate || !lengthFile) {
         printf("Error opening files\n");
