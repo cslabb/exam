@@ -1,0 +1,5 @@
+RADD	&ARG1,&ARG2
+LDA	?1
+ADD	?2
+STA	?1
+MEND
