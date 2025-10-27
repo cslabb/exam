@@ -1,0 +1,38 @@
+400 MOV SI, 500
+403 MOV CX, [SI]
+405 DEC CX
+407 MOV SI, 500
+40A MOV DX, [SI] 
+40C DEC DX 
+40E ADD SI, 2 
+40F MOV AX, [SI] 
+411 ADD SI, 2 
+412 CMP AX, [SI] 
+414 JC 41C 
+416 XCHG AX, [SI]
+418 SUB SI, 2 
+419 XCHG AX, [SI]
+41B ADD SI, 2 
+41C DEC DX 
+41E JNZ 40F 
+420 DEC CX 
+422 JNZ 407 
+424 HLT
+
+INPUT
+    500 : 04 
+    501 : 00 
+    502 : F9 
+    503 : 00
+    504 : E2 
+    505 : 00 
+    506 : 39 
+    507 : 00 
+    508 : 05 
+    509 : 00
+OUTPUT
+    500: 04
+    501: 05
+    502: 39
+    503: E2
+    504: F9
