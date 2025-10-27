@@ -48,7 +48,7 @@ PALINDROME:
 
 NOTPALINDROME:
     MOV AH, 09H
-    LEA DX, MSG3     ;<-- FIX 5
+    LEA DX, MSG3     
     INT 21H
 
 EXIT:
@@ -57,4 +57,3 @@ EXIT:
 
 CODE ENDS
 END START
-; <-- FIX 6: Removed the extra 'ENDS'
