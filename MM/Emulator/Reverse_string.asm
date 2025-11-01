@@ -1,0 +1,39 @@
+DATA SEGMENT
+    STR1 DB 'HELLO$'
+    LEN  EQU 5
+    STR2 DB 5 DUP(?)
+    MSG  DB 10, 13, 'Reversed string is: $'
+DATA ENDS
+
+CODE SEGMENT
+    ASSUME CS:CODE, DS:DATA
+START:
+    MOV AX, DATA
+    MOV DS, AX
+
+    LEA SI, STR1
+    LEA DI, STR2
+    ADD DI, LEN
+    DEC DI
+    MOV CX, LEN
+
+LOOP1:
+    MOV AL, [SI]
+    MOV [DI], AL
+    INC SI
+    DEC DI
+    DEC CX
+    JNZ LOOP1
+
+    LEA DX, MSG
+    MOV AH, 09H
+    INT 21H
+    
+    LEA DX, STR2
+    MOV AH, 09H
+    INT 21H
+    
+    MOV AH, 4CH
+    INT 21H
+CODE ENDS
+END START

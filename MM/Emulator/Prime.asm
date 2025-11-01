@@ -1,0 +1,50 @@
+DATA SEGMENT
+    NUM DW 0007H
+    MSG_PRIME DB 10, 13, 'Number is Prime$'
+    MSG_NOT_PRIME DB 10, 13, 'Number is Not Prime$'
+DATA ENDS
+
+CODE SEGMENT
+    ASSUME CS:CODE, DS:DATA
+START:
+    MOV AX, DATA
+    MOV DS, AX
+
+    MOV AX, NUM
+    CMP AX, 1
+    JBE NOT_PRIME
+    
+    MOV CX, AX
+    DEC CX
+    MOV BX, AX
+
+CHECK_LOOP:
+    CMP CX, 1
+    JE PRIME
+    
+    MOV DX, 0
+    MOV AX, BX
+    DIV CX
+    
+    CMP DX, 0
+    JE NOT_PRIME
+    
+    DEC CX
+    JMP CHECK_LOOP
+
+PRIME:
+    LEA DX, MSG_PRIME
+    MOV AH, 09H
+    INT 21H
+    JMP EXIT
+
+NOT_PRIME:
+    LEA DX, MSG_NOT_PRIME
+    MOV AH, 09H
+    INT 21H
+
+EXIT:
+    MOV AH, 4CH
+    INT 21H
+CODE ENDS
+END START

@@ -1,0 +1,56 @@
+DATA SEGMENT
+    STR1 DB 'HELLO WORLD$'
+    VOWEL_COUNT DW 0
+DATA ENDS
+
+CODE SEGMENT
+    ASSUME CS:CODE, DS:DATA
+START:
+    MOV AX, DATA
+    MOV DS, AX
+
+    LEA SI, STR1
+    MOV BX, 0
+
+LOOP1:
+    MOV AL, [SI]
+    CMP AL, '$'
+    JE EXIT
+
+    CMP AL, 'A'
+    JE VOWEL_FOUND
+    CMP AL, 'E'
+    JE VOWEL_FOUND
+    CMP AL, 'I'
+    JE VOWEL_FOUND
+    CMP AL, 'O'
+    JE VOWEL_FOUND
+    CMP AL, 'U'
+    JE VOWEL_FOUND
+    CMP AL, 'a'
+    JE VOWEL_FOUND
+    CMP AL, 'e'
+    JE VOWEL_FOUND
+    CMP AL, 'i'
+    JE VOWEL_FOUND
+    CMP AL, 'o'
+    JE VOWEL_FOUND
+    CMP AL, 'u'
+    JE VOWEL_FOUND
+    
+    JMP NEXT_CHAR
+
+VOWEL_FOUND:
+    INC BX
+
+NEXT_CHAR:
+    INC SI
+    JMP LOOP1
+
+EXIT:
+    MOV VOWEL_COUNT, BX
+    
+    MOV AH, 4CH
+    INT 21H
+CODE ENDS
+END START
