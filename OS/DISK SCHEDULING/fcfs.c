@@ -1,46 +1,41 @@
+/*
+ * Fixed OS/DISK SCHEDULING/fcfs.c
+ * The original file was a CPU scheduler. This is a correct DISK FCFS.
+ */
 #include <stdio.h>
-struct process
-{
-int pid;
-int bt;
-int wt;
-int tat;
-} p[50];
+#include <stdlib.h>
+
 int main()
 {
-int n, temp, i, j;
-printf("Please Enter no of processes : ");
-scanf("%d", &n);
-printf("\nPlease Enter Burst Time of processes : \n");
-for (i = 0; i < n; i++)
-{
-printf("P%d : ", i + 1);
-p[i].pid = i + 1;
-scanf("%d", &p[i].bt);
+    int queue[100], n, head_pos, i;
+    int total_head_movement = 0;
+
+    printf("Enter the number of disk requests: ");
+    scanf("%d", &n);
+
+    printf("Enter the requests in order: \n");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &queue[i]);
+    }
+
+    printf("Enter the initial head position: ");
+    scanf("%d", &head_pos);
+
+    printf("\n--- FCFS Disk Scheduling Path ---\n");
+    printf("Head starts at %d\n", head_pos);
+
+    // Calculate total head movement
+    for (i = 0; i < n; i++) {
+        int movement = abs(queue[i] - head_pos);
+        total_head_movement += movement;
+        printf("Move from %d to %d (Movement: %d)\n", head_pos, queue[i], movement);
+        head_pos = queue[i]; // Update head position
+    }
+
+    printf("\nTotal Head Movement: %d\n", total_head_movement);
+
+    float avg_head_movement = (float)total_head_movement / n;
+    printf("Average Head Movement: %.2f\n", avg_head_movement);
+
+    return 0;
 }
-for (i = 0; i < n; i++)
-{
-if (i == 0)
-{
-p[i].wt = 0;
-p[i].tat = p[i].wt + p[i].bt;
-continue;
-}
-p[i].wt = p[i - 1].bt + p[i - 1].wt;
-p[i].tat = p[i].wt + p[i].bt;
-}
-printf("\nPid\tBT\tWT\tTAT\n");
-for (i = 0; i < n; i++)
-{
-printf("%d\t%d\t%d\t%d\n", p[i].pid, p[i].bt, p[i].wt, p[i].tat);
-}
-temp = 0;
-for (i = 0; i < n; i++)
-temp += p[i].wt;
-printf("\ntotal waiting time\t\t:%d\n", temp);
-printf("average waiting time\t\t:%f\n", (float)temp / n);
-temp = 0;
-for (i = 0; i < n; i++)
-temp += p[i].tat;
-printf("total turn around time\t\t:%d\n", temp);
-printf("average turn around time\t:%f\n", (float)temp / n);
