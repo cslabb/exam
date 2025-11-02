@@ -1,3 +1,7 @@
+/*
+ * Fixed OS/CPU Scheduling/sjf.c
+ * This is a complete rewrite for a correct non-preemptive SJF algorithm.
+ */
 #include<stdio.h>
 
 struct Process {
@@ -7,37 +11,54 @@ struct Process {
     int completiontime;
     int waitingtime;
     int turnaroundtime;
+    int isCompleted; // Flag to track completion
 };
 
-// Sort processes based on burst time (SJF)
-void sortProcesses(struct Process processes[], int n) {
-    for(int i = 0; i < n-1; i++) {
-        for(int j = 0; j < n-i-1; j++) {
-            if(processes[j].bursttime > processes[j+1].bursttime) {
-                struct Process temp = processes[j];
-                processes[j] = processes[j+1];
-                processes[j+1] = temp;
+void calculateTimes(struct Process processes[], int n) {
+    int currentTime = 0;
+    int completed = 0;
+    float total_wt = 0, total_tat = 0;
+
+    for (int i = 0; i < n; i++) {
+        processes[i].isCompleted = 0;
+    }
+
+    while (completed != n) {
+        int shortest_job_index = -1;
+        int min_burst = 999999;
+
+        // Find the shortest job that has arrived and is not completed
+        for (int i = 0; i < n; i++) {
+            if (processes[i].arrivaltime <= currentTime && processes[i].isCompleted == 0) {
+                if (processes[i].bursttime < min_burst) {
+                    min_burst = processes[i].bursttime;
+                    shortest_job_index = i;
+                }
             }
         }
-    }
-}
 
-void calculateTimes(struct Process processes[], int n) {
-    // Calculate completion time, waiting time, and turnaround time
-    processes[0].completiontime = processes[0].arrivaltime + processes[0].bursttime;
-    processes[0].turnaroundtime = processes[0].completiontime - processes[0].arrivaltime;
-    processes[0].waitingtime = processes[0].turnaroundtime - processes[0].bursttime;
-
-    for(int i = 1; i < n; i++) {
-        // If process arrives after previous process completion
-        if(processes[i].arrivaltime > processes[i-1].completiontime) {
-            processes[i].completiontime = processes[i].arrivaltime + processes[i].bursttime;
+        if (shortest_job_index == -1) {
+            // No process has arrived yet, increment time (IDLE)
+            currentTime++;
         } else {
-            processes[i].completiontime = processes[i-1].completiontime + processes[i].bursttime;
+            // Process the shortest job
+            struct Process *p = &processes[shortest_job_index];
+
+            p->completiontime = currentTime + p->bursttime;
+            p->turnaroundtime = p->completiontime - p->arrivaltime;
+            p->waitingtime = p->turnaroundtime - p->bursttime;
+
+            if (p->waitingtime < 0) {
+                 p->waitingtime = 0;
+            }
+
+            total_wt += p->waitingtime;
+            total_tat += p->turnaroundtime;
+
+            p->isCompleted = 1;
+            completed++;
+            currentTime = p->completiontime;
         }
-        
-        processes[i].turnaroundtime = processes[i].completiontime - processes[i].arrivaltime;
-        processes[i].waitingtime = processes[i].turnaroundtime - processes[i].bursttime;
     }
 }
 
@@ -74,17 +95,13 @@ int main() {
     
     struct Process processes[n];
     
-    // Input process details
     for(int i = 0; i < n; i++) {
         printf("Enter the arrival time and burst time for process P%d: ", i+1);
         scanf("%d %d", &processes[i].arrivaltime, &processes[i].bursttime);
         processes[i].pid = i+1;
     }
     
-    // Sort processes by burst time (SJF)
-    sortProcesses(processes, n);
-    
-    // Calculate all times
+    // Calculate all times using correct SJF logic
     calculateTimes(processes, n);
     
     // Print results
