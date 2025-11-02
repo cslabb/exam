@@ -1,3 +1,5 @@
+/* * Fixed SS/pass1/pass1.c
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,7 +23,7 @@ int main() {
     fscanf(input, "%s\t%s\t%s", label, opcode, operand);
 
     if (strcmp(opcode, "START") == 0) {
-        start = atoi(operand);
+        start = (int)strtol(operand, NULL, 16); // Use strtol for hex
         locctr = start;
         fprintf(intermediate, "\t%s\t%s\t%s\n", label, opcode, operand);
         fscanf(input, "%s\t%s\t%s", label, opcode, operand);
@@ -30,10 +32,10 @@ int main() {
     }
 
     while (strcmp(opcode, "END") != 0) {
-        fprintf(intermediate, "%d\t%s\t%s\t%s\n", locctr, label, opcode, operand);
+        fprintf(intermediate, "%X\t%s\t%s\t%s\n", locctr, label, opcode, operand);
 
         if (strcmp(label, "**") != 0) {
-            fprintf(symtab, "%s\t%d\n", label, locctr);
+            fprintf(symtab, "%s\t%X\n", label, locctr);
         }
 
         rewind(optab);
@@ -51,25 +53,38 @@ int main() {
                 locctr += 3;
             } else if (strcmp(opcode, "RESW") == 0) {
                 locctr += (3 * atoi(operand));
-            } else if (strcmp(opcode, "BYTE") == 0) {
-                locctr += strlen(operand) - 2; 
+            } 
+            // ----- BUG FIX: Correct BYTE length calculation -----
+            else if (strcmp(opcode, "BYTE") == 0) {
+                if (operand[0] == 'C' || operand[0] == 'c') {
+                    // C'...' -> length is characters between quotes
+                    locctr += (strlen(operand) - 3); 
+                } else if (operand[0] == 'X' || operand[0] == 'x') {
+                    // X'...' -> length is (hex chars) / 2
+                    locctr += (strlen(operand) - 3) / 2;
+                } else {
+                    // Assume single byte if format is unknown
+                    locctr += 1;
+                }
+            // ----- END BUG FIX -----
             } else if (strcmp(opcode, "RESB") == 0) {
                 locctr += atoi(operand);
             } else {
                 printf("Invalid opcode: %s\n", opcode);
+                // exit(1); // Optional: stop on error
             }
         }
 
         fscanf(input, "%s\t%s\t%s", label, opcode, operand);
     }
 
-    fprintf(intermediate, "%d\t%s\t%s\t%s\n", locctr, label, opcode, operand);
+    fprintf(intermediate, "%X\t%s\t%s\t%s\n", locctr, label, opcode, operand);
 
     length = locctr - start;
-    fprintf(lengthFile, "%d", length);
+    fprintf(lengthFile, "%X", length); // Write length as hex
 
     printf("PASS 1 Completed Successfully.\n");
-    printf("Program Length: %d\n", length);
+    printf("Program Length: %X\n", length);
 
     fclose(input);
     fclose(optab);
