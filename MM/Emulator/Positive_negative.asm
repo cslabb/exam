@@ -3,12 +3,14 @@ DATA SEGMENT
     COUNT     DW 05H
     POS_ARRAY DW 5 DUP(?)
     NEG_ARRAY DW 5 DUP(?)
+    MSG1      DB 'Positive numbers:$'
+    MSG2      DB 0DH,0AH,'Negative numbers:$'
 DATA ENDS
 
 CODE SEGMENT
     ASSUME CS:CODE, DS:DATA
 START:
-    MOV AX, DATA
+    MOV AX, @DATA
     MOV DS, AX
 
     LEA SI, ARRAY
@@ -20,7 +22,7 @@ LOOP1:
     MOV AX, [SI]
     TEST AX, 8000H
     JZ POSITIVE
-    
+
     MOV [BP], AX
     ADD BP, 2
     JMP NEXT_NUM
@@ -28,13 +30,78 @@ LOOP1:
 POSITIVE:
     MOV [DI], AX
     ADD DI, 2
-    
+
 NEXT_NUM:
     ADD SI, 2
-    DEC CX
-    JNZ LOOP1
+    LOOP LOOP1
+
+    LEA DX, MSG1
+    MOV AH, 09H
+    INT 21H
+
+    LEA SI, POS_ARRAY
+    MOV CX, COUNT
+POS_DISP:
+    MOV AX, [SI]
+    CMP AX, 0
+    JE SKIP_POS
+    CALL DISP_NUM
+SKIP_POS:
+    ADD SI, 2
+    LOOP POS_DISP
+
+    LEA DX, MSG2
+    MOV AH, 09H
+    INT 21H
+
+    LEA SI, NEG_ARRAY
+    MOV CX, COUNT
+NEG_DISP:
+    MOV AX, [SI]
+    CMP AX, 0
+    JE SKIP_NEG
+    CALL DISP_NUM
+SKIP_NEG:
+    ADD SI, 2
+    LOOP NEG_DISP
 
     MOV AH, 4CH
     INT 21H
+
+DISP_NUM PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+
+    MOV BX, 10
+    XOR CX, CX
+
+CONVERT:
+    XOR DX, DX
+    DIV BX
+    PUSH DX
+    INC CX
+    TEST AX, AX
+    JNZ CONVERT
+
+PRINT:
+    POP DX
+    ADD DL, 30H
+    MOV AH, 02H
+    INT 21H
+    LOOP PRINT
+
+    MOV DL, ' '
+    MOV AH, 02H
+    INT 21H
+
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+DISP_NUM ENDP
+
 CODE ENDS
 END START

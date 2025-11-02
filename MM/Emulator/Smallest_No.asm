@@ -1,7 +1,8 @@
 DATA SEGMENT
     ARRAY   DW 5555H, 1111H, 4444H, 2222H, 3333H
-    COUNT   DW 05H
+    COUNT   DW 5
     SMALLEST DW ?
+    MSG1 DB 10,13, 'The smallest number is: $'
 DATA ENDS
 
 CODE SEGMENT
@@ -13,24 +14,56 @@ START:
     LEA SI, ARRAY
     MOV CX, COUNT
     MOV AX, [SI]
-    
     DEC CX
-    JZ EXIT
-    
-UP:
+    JZ DISPLAY
+
+FIND_SMALLEST:
     ADD SI, 2
     CMP AX, [SI]
     JLE NO_CHANGE
     MOV AX, [SI]
-    
+
 NO_CHANGE:
     DEC CX
-    JNZ UP
-    
-EXIT:
+    JNZ FIND_SMALLEST
+
+DISPLAY:
     MOV SMALLEST, AX
-    
+    LEA DX, MSG1
+    MOV AH, 9
+    INT 21H
+
+    MOV AX, SMALLEST
+    CALL PRINT_HEX
+
     MOV AH, 4CH
     INT 21H
+
+PRINT_HEX PROC
+    PUSH AX
+    PUSH BX
+    PUSH CX
+    PUSH DX
+    MOV CX, 4
+HEX_LOOP:
+    ROL AX, 4
+    MOV BL, AL
+    AND BL, 0FH
+    CMP BL, 9
+    JBE DIGIT
+    ADD BL, 7
+DIGIT:
+    ADD BL, 30H
+    MOV DL, BL
+    MOV AH, 02H
+    INT 21H
+    LOOP HEX_LOOP
+    POP DX
+    POP CX
+    POP BX
+    POP AX
+    RET
+PRINT_HEX ENDP
+
 CODE ENDS
 END START

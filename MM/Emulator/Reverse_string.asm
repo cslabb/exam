@@ -1,8 +1,10 @@
 DATA SEGMENT
-    STR1 DB 'HELLO$'
-    LEN  EQU 5
-    STR2 DB 5 DUP(?)
-    MSG  DB 10, 13, 'Reversed string is: $'
+    MSG1 DB 'Enter a string: $'
+    MSG2 DB 10,13,'Reversed string is: $'
+    BUFFER DB 20
+           DB ?
+           DB 20 DUP(?)
+    REVERSE DB 20 DUP(?)
 DATA ENDS
 
 CODE SEGMENT
@@ -11,28 +13,39 @@ START:
     MOV AX, DATA
     MOV DS, AX
 
-    LEA SI, STR1
-    LEA DI, STR2
-    ADD DI, LEN
-    DEC DI
-    MOV CX, LEN
+    LEA DX, MSG1
+    MOV AH, 09H
+    INT 21H
 
-LOOP1:
+    LEA DX, BUFFER
+    MOV AH, 0AH
+    INT 21H
+
+    MOV CL, BUFFER+1
+    MOV CH, 0
+    MOV SI, OFFSET BUFFER+2
+    MOV DI, OFFSET REVERSE
+    ADD SI, CX
+    DEC SI
+
+REVERSE_LOOP:
     MOV AL, [SI]
     MOV [DI], AL
-    INC SI
-    DEC DI
-    DEC CX
-    JNZ LOOP1
+    INC DI
+    DEC SI
+    LOOP REVERSE_LOOP
 
-    LEA DX, MSG
+    MOV AL, '$'
+    MOV [DI], AL
+
+    LEA DX, MSG2
     MOV AH, 09H
     INT 21H
-    
-    LEA DX, STR2
+
+    LEA DX, REVERSE
     MOV AH, 09H
     INT 21H
-    
+
     MOV AH, 4CH
     INT 21H
 CODE ENDS
