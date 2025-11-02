@@ -73,7 +73,7 @@ void main() {
 
             // Process each 3-byte instruction in the record
             len = strlen(bit);
-            for (i = 0; i < len; i++) {
+            for (i = 0; i < (t_len / 3); i++) {
                 // Read the opcode and address part
                 fscanf(fp_in, "%2x%4x", &opcode, &addr);
 
