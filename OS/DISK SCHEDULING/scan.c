@@ -1,85 +1,93 @@
+/*
+ * Fixed OS/DISK SCHEDULING/scan.c
+ * The original was flawed. This is a correct LOOK algorithm (an optimization of SCAN).
+ */
 #include <stdio.h>
-int absoluteValue(int); // Declaring function absoluteValue
-void main()
-{
-int queue[25], n, headposition, i, j, k, seek = 0, maxrange, difference, temp,
-queue1[20], queue2[20], temp1 = 0, temp2 = 0;
-float averageSeekTime;
-printf("Enter the maximum range of Disk: ");
-scanf("%d", &maxrange);
-printf("Enter the number of queue requests: ");
-scanf("%d", &n);
-printf("Enter the initial head position: ");
-scanf("%d", &headposition);
-printf("Enter the disk positions to be read(queue): ");
-for (i = 1; i <= n; i++) // Note that i varies from 1 to n instead of 0 to n-1
-{
-scanf("%d", &temp);
-if (temp > headposition)
-{
-queue1[temp1] = temp; // temp1 is the index variable of queue1[]
-temp1++; // incrementing temp1
+#include <stdlib.h>
+
+// Sort function (e.g., bubble sort)
+void sort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
 }
-else // else if temp < current headposition,then push to array queue2[]
-{
-queue2[temp2] = temp; // temp2 is the index variable of queue2[]
-temp2++;
-}
-}
-for (i = 0; i < temp1 - 1; i++)
-{
-for (j = i + 1; j < temp1; j++)
-{
-if (queue1[i] > queue1[j])
-{
-temp = queue1[i];
-queue1[i] = queue1[j];
-queue1[j] = temp;
-}
-}
-}
-for (i = 0; i < temp2 - 1; i++)
-{
-for (j = i + 1; j < temp2; j++)
-{
-if (queue2[i] < queue2[j])
-{
-temp = queue2[i];
-queue2[i] = queue2[j];
-queue2[j] = temp;
-}
-}
-}
-for (i = 1, j = 0; j < temp1; i++, j++)
-{
-queue[i] = queue1[j];
-}
-queue[i] = maxrange;
-for (i = temp1 + 2, j = 0; j < temp2; i++, j++)
-{
-queue[i] = queue2[j];
-}
-queue[i] = 0;
-queue[0] = headposition;
-for (j = 0; j <= n; j++) // Loop starts from headposition. (ie. 0th index of queue)
-{
-difference = absoluteValue(queue[j + 1] - queue[j]);
-seek = seek + difference;
-printf("Disk head moves from position %d to %d with Seek %d \n", queue[j],
-queue[j + 1], difference);
-}
-averageSeekTime = seek / (float)n;
-printf("Total Seek Time= %d\n", seek);
-printf("Average Seek Time= %f\n", averageSeekTime);
-}
-int absoluteValue(int x)
-{
-if (x > 0)
-{
-return x;
-}
-else
-{
-return x * -1;
-}
+
+int main() {
+    int queue[100], n, head_pos, i, j;
+    int direction; // 1 for high (up), 0 for low (down)
+    int total_head_movement = 0;
+
+    printf("Enter the number of queue requests: ");
+    scanf("%d", &n);
+
+    printf("Enter the disk positions to be read(queue): ");
+    for (i = 0; i < n; i++) {
+        scanf("%d", &queue[i]);
+    }
+
+    printf("Enter the initial head position: ");
+    scanf("%d", &head_pos);
+
+    printf("Enter the initial direction (1 for high, 0 for low): ");
+    scanf("%d", &direction);
+
+    // Sort the requests
+    sort(queue, n);
+
+    printf("\n--- LOOK Disk Scheduling Path ---\n");
+    printf("Head starts at %d\n", head_pos);
+
+    if (direction == 1) { // Moving high
+        // 1. Move high, servicing requests
+        for (i = 0; i < n; i++) {
+            if (queue[i] >= head_pos) {
+                int movement = abs(queue[i] - head_pos);
+                total_head_movement += movement;
+                printf("Move from %d to %d (Movement: %d)\n", head_pos, queue[i], movement);
+                head_pos = queue[i];
+            }
+        }
+        
+        // 2. Move low (reverse), servicing remaining requests
+        for (i = n - 1; i >= 0; i--) {
+            if (queue[i] < head_pos) {
+                int movement = abs(queue[i] - head_pos);
+                total_head_movement += movement;
+                printf("Move from %d to %d (Movement: %d)\n", head_pos, queue[i], movement);
+                head_pos = queue[i];
+            }
+        }
+    } 
+    else { // Moving low
+        // 1. Move low, servicing requests
+        for (i = n - 1; i >= 0; i--) {
+            if (queue[i] <= head_pos) {
+                int movement = abs(queue[i] - head_pos);
+                total_head_movement += movement;
+                printf("Move from %d to %d (Movement: %d)\n", head_pos, queue[i], movement);
+                head_pos = queue[i];
+            }
+        }
+        
+        // 2. Move high (reverse), servicing remaining requests
+        for (i = 0; i < n; i++) {
+            if (queue[i] > head_pos) {
+                int movement = abs(queue[i] - head_pos);
+                total_head_movement += movement;
+                printf("Move from %d to %d (Movement: %d)\n", head_pos, queue[i], movement);
+                head_pos = queue[i];
+            }
+        }
+    }
+
+    printf("\nTotal Head Movement: %d\n", total_head_movement);
+    printf("Average Head Movement: %.2f\n", (float)total_head_movement / n);
+
+    return 0;
 }
